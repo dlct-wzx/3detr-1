@@ -25,7 +25,9 @@ class Matcher(nn.Module):
 
     @torch.no_grad()
     def forward(self, outputs, targets):
-
+        assert "sem_cls_prob" in outputs, "Error: outputs missing 'sem_cls_prob'"
+        assert "gt_box_sem_cls_label" in targets, "Error: targets missing 'gt_box_sem_cls_label'"
+        
         batchsize = outputs["sem_cls_prob"].shape[0]
         nqueries = outputs["sem_cls_prob"].shape[1]
         ngt = targets["gt_box_sem_cls_label"].shape[1]
@@ -38,6 +40,7 @@ class Matcher(nn.Module):
             .unsqueeze(1)
             .expand(batchsize, nqueries, ngt)
         )
+        assert gt_box_sem_cls_labels.max() < pred_cls_prob.shape[2], "Index out of bounds!"
         class_mat = -torch.gather(pred_cls_prob, 2, gt_box_sem_cls_labels)
 
         # objectness cost: batch x nqueries x 1
@@ -48,6 +51,18 @@ class Matcher(nn.Module):
 
         # giou cost: batch x nqueries x ngt
         giou_mat = -outputs["gious"].detach()
+
+        assert not torch.isnan(class_mat).any(), "NaN detected in class_mat!"
+        assert not torch.isinf(class_mat).any(), "Inf detected in class_mat!"
+
+        assert not torch.isnan(objectness_mat).any(), "NaN detected in objectness_mat!"
+        assert not torch.isinf(objectness_mat).any(), "Inf detected in objectness_mat!"
+
+        assert not torch.isnan(center_mat).any(), "NaN detected in center_mat!"
+        assert not torch.isinf(center_mat).any(), "Inf detected in center_mat!"
+
+        assert not torch.isnan(giou_mat).any(), "NaN detected in giou_mat!"
+        assert not torch.isinf(giou_mat).any(), "Inf detected in giou_mat!"
 
         final_cost = (
             self.cost_class * class_mat

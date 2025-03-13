@@ -1,11 +1,12 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 from .scannet import ScannetDetectionDataset, ScannetDatasetConfig
 from .sunrgbd import SunrgbdDetectionDataset, SunrgbdDatasetConfig
-
+from .to_scene import ToSceneDetectionDataset, ToSceneDatasetConfig
 
 DATASET_FUNCTIONS = {
     "scannet": [ScannetDetectionDataset, ScannetDatasetConfig],
     "sunrgbd": [SunrgbdDetectionDataset, SunrgbdDatasetConfig],
+    "to_scene": [ToSceneDetectionDataset, ToSceneDatasetConfig],
 }
 
 
@@ -18,7 +19,7 @@ def build_dataset(args):
             dataset_config, 
             split_set="train", 
             root_dir=args.dataset_root_dir, 
-            meta_data_dir=args.meta_data_dir, 
+            # meta_data_dir=args.meta_data_dir, 
             use_color=args.use_color,
             augment=True
         ),

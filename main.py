@@ -102,7 +102,7 @@ def make_args_parser():
 
     ##### Dataset #####
     parser.add_argument(
-        "--dataset_name", required=True, type=str, choices=["scannet", "sunrgbd"]
+        "--dataset_name", required=True, type=str, choices=["scannet", "sunrgbd", "to_scene"]
     )
     parser.add_argument(
         "--dataset_root_dir",
@@ -123,7 +123,7 @@ def make_args_parser():
 
     ##### Training #####
     parser.add_argument("--start_epoch", default=-1, type=int)
-    parser.add_argument("--max_epoch", default=720, type=int)
+    parser.add_argument("--max_epoch", default=250, type=int)
     parser.add_argument("--eval_every_epoch", default=10, type=int)
     parser.add_argument("--seed", default=0, type=int)
 
