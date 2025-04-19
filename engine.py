@@ -16,6 +16,7 @@ from utils.dist import (
     reduce_dict,
     barrier,
 )
+from utils.dump_helper import dump_results
 
 
 def compute_learning_rate(args, curr_epoch_normalized):
@@ -191,6 +192,12 @@ def evaluate(
         # Memory intensive as it gathers point cloud GT tensor across all ranks
         outputs["outputs"] = all_gather_dict(outputs["outputs"])
         batch_data_label = all_gather_dict(batch_data_label)
+
+
+        if args.visualize:
+            # dump results
+            dump_results(outputs["outputs"], batch_data_label, args.dump_dir, batch_idx)
+
         ap_calculator.step_meter(outputs, batch_data_label)
         time_delta.update(time.time() - curr_time)
         if is_primary() and curr_iter % args.log_every == 0:

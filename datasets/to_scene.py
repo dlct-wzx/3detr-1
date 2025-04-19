@@ -133,7 +133,7 @@ class ToSceneDetectionDataset(Dataset):
         self,
         dataset_config,
         split_set="train",
-        root_dir=None,
+        root_dir='../to_scene',
         num_points=10000,
         use_color=False,
         use_height=False,
@@ -149,7 +149,7 @@ class ToSceneDetectionDataset(Dataset):
 
         if root_dir is None:
             root_dir = DATA_PATH_V1 if use_v1 else DATA_PATH_V2
-
+        root_dir = 'to_scene'
         self.data_path = os.path.join(root_dir, split_set)
 
         if split_set in ["train", "val"]:
@@ -303,8 +303,8 @@ class ToSceneDetectionDataset(Dataset):
         for i in range(bboxes.shape[0]):
             bbox = bboxes[i]
             semantic_class = bbox[7]
-            raw_angles[i] = bbox[6] % 2 * np.pi
-            box3d_size = bbox[3:6] * 2
+            raw_angles[i] = bbox[6]
+            box3d_size = bbox[3:6]
             raw_sizes[i, :] = box3d_size
             angle_class, angle_residual = self.dataset_config.angle2class(bbox[6])
             angle_classes[i] = angle_class

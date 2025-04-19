@@ -119,11 +119,11 @@ def make_args_parser():
               If None, default values from scannet.py/sunrgbd.py are used",
     )
     parser.add_argument("--dataset_num_workers", default=4, type=int)
-    parser.add_argument("--batchsize_per_gpu", default=8, type=int)
+    parser.add_argument("--batchsize_per_gpu", default=10, type=int)
 
     ##### Training #####
     parser.add_argument("--start_epoch", default=-1, type=int)
-    parser.add_argument("--max_epoch", default=250, type=int)
+    parser.add_argument("--max_epoch", default=100, type=int)
     parser.add_argument("--eval_every_epoch", default=10, type=int)
     parser.add_argument("--seed", default=0, type=int)
 
@@ -135,11 +135,18 @@ def make_args_parser():
     parser.add_argument("--checkpoint_dir", default=None, type=str)
     parser.add_argument("--log_every", default=10, type=int)
     parser.add_argument("--log_metrics_every", default=20, type=int)
-    parser.add_argument("--save_separate_checkpoint_every_epoch", default=100, type=int)
+    parser.add_argument("--save_separate_checkpoint_every_epoch", default=10, type=int)
 
     ##### Distributed Training #####
     parser.add_argument("--ngpus", default=1, type=int)
     parser.add_argument("--dist_url", default="tcp://localhost:12345", type=str)
+
+    ##### Visualize #####
+    parser.add_argument("--visualize", default=False, action="store_true")
+    parser.add_argument("--dump_dir", default='dump_dir', type=str)
+
+    ##### Pretrained model #####
+    parser.add_argument("--pretrained_ckpt", default=None, type=str)
 
     return parser
 
@@ -356,6 +363,15 @@ def main(local_rank, args):
     model = model.cuda(local_rank)
     model_no_ddp = model
 
+    if args.pretrained_ckpt is not None:
+        if not os.path.isfile(args.pretrained_ckpt):
+            print(f"Pretrained checkpoint {args.pretrained_ckpt} not found.")
+            sys.exit(1)
+        print(f"Loading pretrained checkpoint {args.pretrained_ckpt}")
+        sd = torch.load(args.pretrained_ckpt)
+        model_no_ddp.load_state_dict(sd["model"], strict=False)
+        model.load_state_dict(sd["model"], strict=False)
+
     if is_distributed():
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
         model = torch.nn.parallel.DistributedDataParallel(
@@ -363,6 +379,8 @@ def main(local_rank, args):
         )
     criterion = build_criterion(args, dataset_config)
     criterion = criterion.cuda(local_rank)
+
+    
 
     dataloaders = {}
     if args.test_only:

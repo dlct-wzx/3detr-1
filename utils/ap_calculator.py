@@ -349,7 +349,6 @@ class APCalculator(object):
             point_cloud,
             self.ap_config_dict,
         )
-
         self.accumulate(batch_pred_map_cls, batch_gt_map_cls)
 
     def accumulate(self, batch_pred_map_cls, batch_gt_map_cls):

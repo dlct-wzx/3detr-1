@@ -9,4 +9,7 @@ utils/build/*
 
 # outputs
 outputs/
-log*/*.pth
+log*/*
+nohup.out
+runs/
+dump_dir/*

@@ -15,7 +15,7 @@ from models.transformer import (MaskedTransformerEncoder, TransformerDecoder,
                                 TransformerDecoderLayer, TransformerEncoder,
                                 TransformerEncoderLayer)
 
-
+import time
 class BoxProcessor(object):
     """
     Class to convert 3DETR MLP head outputs into bounding boxes
@@ -305,7 +305,7 @@ class Model3DETR(nn.Module):
 
     def forward(self, inputs, encoder_only=False):
         point_clouds = inputs["point_clouds"]
-
+        # t1 = time.time()
         enc_xyz, enc_features, enc_inds = self.run_encoder(point_clouds)
         enc_features = self.encoder_to_decoder_projection(
             enc_features.permute(1, 2, 0)
@@ -332,10 +332,12 @@ class Model3DETR(nn.Module):
         box_features = self.decoder(
             tgt, enc_features, query_pos=query_embed, pos=enc_pos
         )[0]
-
+        # t2 = time.time()
         box_predictions = self.get_box_predictions(
             query_xyz, point_cloud_dims, box_features
         )
+        
+        print("Time taken for box prediction: ", t2 - t1)
         return box_predictions
 
 
